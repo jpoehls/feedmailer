@@ -7,22 +7,38 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
-
-type ChannelList []*Chnl
-type ItemList []*Itm
 
 // These are our in-memory database collections.
 var channels []*Chnl
 var items []*Itm
+var fetchErrors []*fetchError
+
+var protector sync.Mutex
+
+type fetchError struct {
+	ChannelUrl string
+	Error      string
+}
 
 func insertChannel(c *Chnl) {
+	defer protector.Unlock()
+	protector.Lock()
 	channels = append(channels, c)
 }
 
 func insertItem(i *Itm) {
+	defer protector.Unlock()
+	protector.Lock()
 	items = append(items, i)
+}
+
+func insertFetchError(e *fetchError) {
+	defer protector.Unlock()
+	protector.Lock()
+	fetchErrors = append(fetchErrors, e)
 }
 
 type bookmark struct {

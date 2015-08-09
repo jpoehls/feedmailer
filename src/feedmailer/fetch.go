@@ -128,8 +128,9 @@ func Fetcher() {
 
 	// Build the email.
 	model := &EmailModel{
-		Channels: channels,
-		Items:    items,
+		Channels:    channels,
+		Items:       items,
+		FetchErrors: fetchErrors,
 	}
 
 	plainText, err := renderPlainText(model)
@@ -183,7 +184,12 @@ func PollFeed(uri string) {
 
 	for {
 		if err := feed.Fetch(uri, nil); err != nil {
-			fmt.Fprintf(os.Stderr, "[e] %s: %s", uri, err)
+			fmt.Fprintf(os.Stderr, "[e] %s: %s\n", uri, err)
+
+			insertFetchError(&fetchError{
+				ChannelUrl: uri,
+				Error:      err.Error(),
+			})
 			return
 		}
 

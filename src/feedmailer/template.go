@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/aymerick/douceur/inliner"
 	rss "github.com/jteeuwen/go-pkg-rss"
-	//"github.com/mauidude/go-readability"
+	"github.com/mauidude/go-readability"
 	html "html/template"
 	"strings"
 	"text/template"
@@ -74,6 +74,15 @@ const htmlTextTemplate string = `
 </ol>
 </div>
 
+<div class="toc">
+<h2>Fetch Errors</h2>
+<ol>
+	{{ range .FetchErrors }}
+	<li>{{ .ChannelUrl }} - {{ .Error }}</li>
+	{{ end }}
+</ol>
+</div>
+
 {{ range .Channels }}
 {{ $channel := . }}
 <div class="channelHeader">
@@ -86,9 +95,9 @@ const htmlTextTemplate string = `
 		<h3>{{ .Title }}</h3>
 		<p><a href="{{ firstLink .Links }}">{{ firstLink .Links }}</a></p>
 	</div>
-	<div class="itemContent">
+	{{/*<div class="itemContent">
 	{{ readability .FullContent }}
-	</div>
+	</div>*/}}
 	{{ end }}
 	{{ end }}
 {{ end }}
@@ -97,8 +106,9 @@ const htmlTextTemplate string = `
 `
 
 type EmailModel struct {
-	Channels []*Chnl
-	Items    []*Itm
+	Channels    []*Chnl
+	Items       []*Itm
+	FetchErrors []*fetchError
 }
 
 var funcMap = map[string]interface{}{
@@ -111,15 +121,15 @@ var funcMap = map[string]interface{}{
 		}
 	},
 	"homePage": func(c Chnl) string { return c.HomePage() },
-	"readability": func(s string) (html.HTML, error) {
-		/*
-			doc, err := readability.NewDocument(s)
-			if err != nil {
-				return html.HTML(""), err
-			}
-			return html.HTML(doc.Content()), nil
-		*/
-		return html.HTML(s), nil
+	"rawHtml": func(s string) html.HTML {
+		return html.HTML(s)
+	},
+	"readability": func(s string) html.HTML {
+		doc, err := readability.NewDocument(s)
+		if err != nil {
+			return html.HTML("")
+		}
+		return html.HTML(doc.Content())
 	},
 }
 

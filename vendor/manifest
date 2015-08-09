@@ -94,6 +94,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/mauidude/go-readability",
+			"repository": "https://github.com/mauidude/go-readability",
+			"revision": "2f30b1a346f19ddab94ffe0cb788331be9399de2",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/mitchellh/mapstructure",
 			"repository": "https://github.com/mitchellh/mapstructure",
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309",
